@@ -34,96 +34,31 @@ def readArguments():
 
     return args.path, args.n, args.largo
 
-# Funcion para crear matriz de seleccionados, va a ser una lista de listas que a su vez contendrá una lista que 
-# tendrá los elementos que aporten a esa ganancia en particular
+def disponerCajas(cajas, L, n):
+    max_alturas = [0] * (n+1)
+    estantes = [0] * (n+1)
 
-def crear_matriz_seleccionados(L, n):
+    for i in range(1,n+1):
+        print(max_alturas)
+        print(estantes)
+        largo = cajas[i-1].largo
+        altura = cajas[i-1].altura
+        print("Largo: " + str(largo))
+        print("Altura: " + str(altura))
+        max_alturas[i] = max_alturas[i-1] + altura
+        estantes[i] = estantes[i-1]+1
+        for j in range(i-1,0,-1):
+            print(j)
+            if (largo + cajas[j-1].largo <= L):
+                altura = max(altura, cajas[j-1].altura)
+                largo = largo + cajas[j-1].largo
+                if (altura + max_alturas[j-1] <= max_alturas[i]):
+                    max_alturas[i] = altura + max_alturas[j-1]
+                    estantes[j] = estantes[i]
+    return max_alturas, estantes
 
-    lista = []
-
-    for i in range(n+1):
-        lista_de_listas = []
-
-        for i in range(L+1):
-            lista_de_listas.append([])
-
-        lista.append(lista_de_listas)
-
-    return lista
-
-# Funcion para crear la matriz de ganancia por cada vez que se evalúe la caja i contra el peso restante j
-# El elemento matriz[i][j] contendrá la ganancia acumulada de los elementos seleccionados[i][j]
-
-def crear_matriz_ganancia(L, n):
-
-    matriz = []
-
-    for i in range(n+1):
-        lista = []
-
-        for i in range(L+1):
-            lista.append(0)
-
-        matriz.append(lista)
     
-    return matriz
 
-# Algoritmo que emplea programacion dinamica para encontrar la mejor disposición de las cajas en estantes tales que la altura total sea mínima
-
-def programacion_dinamica(cajas, alturas, seleccionados, L, n):
-
-    max_altura_estante = 0
-
-    for i in range(0,n):
-        for j in range(1,L+1):
-            altura_temporal = MENOS_INFINITO
-
-            if cajas[i].largo <= j:
-                altura_temporal = cajas[i].altura + alturas[i][j-cajas[i].largo]
-
-            altura_historica = alturas[i][j]
-
-            if altura_temporal > altura_historica:
-                alturas[i+1][j] = altura_temporal
-                seleccionados[i+1][j] = seleccionados[i][j-cajas[i].largo].copy()
-                seleccionados[i+1][j].append(cajas[i])
-
-                if max_altura_estante < cajas[i].altura:
-                    max_altura_estante = cajas[i].altura
-            else:
-                alturas[i+1][j] = altura_historica
-                seleccionados[i+1][j] = seleccionados[i][j].copy()
-
-    return seleccionados[n][L], max_altura_estante
-
-# Funcion que repite el algoritmo de programación dinámica hasta que no haya más cajas que ubicar
-
-def disponer_cajas(cajas, L, n):
-
-    num_estantes = 1
-    altura_acumulada = 0
-
-    while n > 0:
-        seleccionados = crear_matriz_seleccionados(L, n)
-        alturas = crear_matriz_ganancia(L, n)
-
-        seleccionados_final, max_altura_estante = programacion_dinamica(cajas, alturas, seleccionados, L, n)
-
-        print("En el estante "+str(num_estantes)+": Se dispondrán las cajas", end=" ")
-
-        for caja_seleccionada in seleccionados_final:
-            print(caja_seleccionada.cod,end=" ")
-            cajas.remove(caja_seleccionada)
-
-        
-        print("con una altura máxima de "+str(max_altura_estante)+"\n")
-
-        n = len(cajas)
-
-        num_estantes+=1
-        altura_acumulada+=max_altura_estante
-
-    print("La altura de todos los estantes será: "+str(altura_acumulada)+"\n")
 
 # Main
 
@@ -131,4 +66,9 @@ if __name__=="__main__":
 
     archivo, n, L = readArguments()
     cajas = readFile(archivo)
-    disponer_cajas(cajas, L, n)
+    max_alturas, estantes = disponerCajas(cajas, L, n)
+    print("Maxima altura: " + str(max_alturas[n]))
+    for i in range(1,n+1):
+        print("Caja " + str(cajas[i-1].cod) + " en estante " + str(estantes[i]))
+
+
