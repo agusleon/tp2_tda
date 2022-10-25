@@ -34,30 +34,45 @@ def readArguments():
 
     return args.path, args.n, args.largo
 
+# Función que hace uso de la programación dinámica para disponer las cajas ordenadas de manera que se minimice la altura total de los estantes, devuelve la mínima altura
+# y el array de estantes a la que corresponde cada caja
+
 def disponerCajas(cajas, L, n):
     max_alturas = [0] * (n+1)
-    estantes = [0] * (n+1)
+    estantes = [[] for _ in range(n+1)]
 
     for i in range(1,n+1):
-        print(max_alturas)
-        print(estantes)
         largo = cajas[i-1].largo
         altura = cajas[i-1].altura
-        print("Largo: " + str(largo))
-        print("Altura: " + str(altura))
         max_alturas[i] = max_alturas[i-1] + altura
-        estantes[i] = estantes[i-1]+1
+
         for j in range(i-1,0,-1):
-            print(j)
+
             if (largo + cajas[j-1].largo <= L):
+                
                 altura = max(altura, cajas[j-1].altura)
                 largo = largo + cajas[j-1].largo
+
                 if (altura + max_alturas[j-1] <= max_alturas[i]):
                     max_alturas[i] = altura + max_alturas[j-1]
-                    estantes[j] = estantes[i]
-    return max_alturas, estantes
-
+                    estantes[i].append(j)
+            else:
+                break
     
+    return max_alturas[n], estantes
+
+# Función que se encarga de imprimir las cajas pertenecientes a cada estante con la ayuda del array estantes devuelto por la funcion disponerCajas
+
+def imprimirCajas(cajas, estantes, n):
+    i = n
+    while i > 0:
+        print("Estante con cajas: ", end=' ')
+        ultima_caja = cajas[i-1].cod
+        for index in reversed(estantes[i]):
+            print(cajas[index-1].cod, end=' ')
+        i = i - len(estantes[i])-1
+        print(ultima_caja)
+
 
 
 # Main
@@ -66,9 +81,8 @@ if __name__=="__main__":
 
     archivo, n, L = readArguments()
     cajas = readFile(archivo)
-    max_alturas, estantes = disponerCajas(cajas, L, n)
-    print("Maxima altura: " + str(max_alturas[n]))
-    for i in range(1,n+1):
-        print("Caja " + str(cajas[i-1].cod) + " en estante " + str(estantes[i]))
+    min_altura, estantes = disponerCajas(cajas, L, n)
+    print("La mínima altura de todos los estantes será: " + str(min_altura))
+    imprimirCajas(cajas, estantes, n)
 
 
