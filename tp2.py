@@ -39,23 +39,36 @@ def readArguments():
 
 def disponerCajas(cajas, L, n):
     max_alturas = [0] * (n+1)
-    estantes = [[] for _ in range(n+1)]
+    estantes = [0] * (n+1)
 
     for i in range(1,n+1):
+
+        # Cargo largo y altura de la caja actual
         largo = cajas[i-1].largo
         altura = cajas[i-1].altura
+
+        # La altura total de los estantes si se pusiese la caja actual en un estante diferent
         max_alturas[i] = max_alturas[i-1] + altura
 
+        # Recorremos desde la caja anterior para atras hasta la primera caja que no entre habiendo incluido las cajas anteriores en un mismo estante que la caja actual
         for j in range(i-1,0,-1):
-
+            
+            # si la caja en la posición j anterior a i entra la meto
             if (largo + cajas[j-1].largo <= L):
                 
+                # cambio la altura a la maxima entre el valor actual de altura y la altura de la caja que voy a agregar
                 altura = max(altura, cajas[j-1].altura)
+                # cambio el largo ocupado del estante sumandole la nueva caja que voy a agregar
                 largo = largo + cajas[j-1].largo
 
+                # si la nueva altura total de los estanmtes es menor a la altura que teniamos guardada entro
                 if (altura + max_alturas[j-1] <= max_alturas[i]):
+                    # cambio la altura que teniamos guardada por la menor
                     max_alturas[i] = altura + max_alturas[j-1]
-                    estantes[i].append(j)
+                    # agrego la posición del estante que potencialmente puede ir con esa caja
+                    estantes[i] = j
+
+            # si la caja en la posición j anterior a i no entra salgo
             else:
                 break
     
@@ -65,14 +78,21 @@ def disponerCajas(cajas, L, n):
 
 def imprimirCajas(cajas, estantes, n):
     i = n
+    num_estante = 1
     while i > 0:
-        print("Estante con cajas: ", end=' ')
-        ultima_caja = cajas[i-1].cod
-        for index in reversed(estantes[i]):
-            print(cajas[index-1].cod, end=' ')
-        i = i - len(estantes[i])-1
-        print(ultima_caja)
-
+        tail = estantes[i] - 1
+        print("En el estante "+str(num_estante)+":", end=' ')
+        if(tail >= 0):  
+            dif = i - (tail)
+            for j in range(tail, i):
+                print(cajas[j].cod, end=' ')
+            print("")
+        else:
+            print(cajas[i-1].cod)
+            dif = 1 
+        
+        i = i - dif
+        num_estante += 1
 
 
 # Main
